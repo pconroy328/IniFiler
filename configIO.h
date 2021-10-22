@@ -3,6 +3,7 @@
  * Author: patrick
  *
  * Created on March 7, 2010, 8:04 PM
+ * added to git October 22 2021
  */
 
 #ifndef _CONFIGFILES_H
