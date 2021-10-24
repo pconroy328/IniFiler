@@ -105,7 +105,7 @@ static  char *chgext(char *path, char *oldext, char *newext)
 **
 **  Note: This does not modify the original string.
 */
-
+static
 char *StripLeadingSpaces(char *string)
 {
       if (!string || (0 == strlen(string)))
@@ -126,11 +126,28 @@ char *StripLeadingSpaces(char *string)
 **
 **  Note: This does modify the original string.
 */
-
+static
 char *StripTrailingSpaces(char *string)
 {
       if (!string || (0 == strlen(string)))
             return NULL;
+
+      //while (isspace(LAST_CHAR(string)))
+       //     LAST_CHAR(string) = NUL;
+
+      //
+      // Let's check to see if they  added a comment block
+      // after the value
+      char  *cPtr = NULL;
+      cPtr = strchr( string, '#' );
+      if (cPtr == NULL)
+          cPtr = strchr( string, '%' );
+      if (cPtr == NULL)
+          cPtr = strchr( string, '%' );
+
+    if (cPtr != NULL)  {
+        *cPtr = NUL;
+    }     
 
       while (isspace(LAST_CHAR(string)))
             LAST_CHAR(string) = NUL;
@@ -191,7 +208,7 @@ static int ReadLine(FILE *fp, char *line)
 **
 **  Returns: TRUE_ if strings match, else FALSE_.
 */
-
+static
 bool StrEq (char *s1, char *s2)
 {
       while (tolower(*s1) == tolower(*s2))
@@ -224,7 +241,10 @@ static void ParseLine(char *line, char *var, char *data)
       strcpy(var, line);
       strcpy(data, "");
 
-      while (*line)
+      //
+      // New - see if we can bail out when we hit a '#' in case they 
+      // plunked a comment at the end of the line
+      while (*line != '#' && *line != '\0')
       {
             char *ptr;
 
@@ -326,7 +346,7 @@ static enum LineTypes SectionLine(char *line,
 **           -2 for any type of file error
 */
 
-int ReadCfg(const char *FileName, char *SectionName, struct CfgStruct *MyVars)
+int IniFiler_ReadCfg(const char *FileName, char *SectionName, struct CfgStruct *MyVars)
 {
       FILE *CfgFile;
       char line[BUFFERSIZE];
@@ -508,7 +528,7 @@ int ReadCfg(const char *FileName, char *SectionName, struct CfgStruct *MyVars)
 **           -2 for file error
 */
 
-int SearchCfg(const char *FileName,
+int IniFiler_SearchCfg(const char *FileName,
               char *SectionName,
               char *VarName,
               void *DataPtr,
@@ -523,7 +543,7 @@ int SearchCfg(const char *FileName,
 
       MyVars[1].Name = MyVars[1].DataPtr = NULL;
 
-      return ReadCfg(FileName, SectionName, MyVars);
+      return IniFiler_ReadCfg(FileName, SectionName, MyVars);
 }
 
 /*
@@ -549,7 +569,7 @@ int SearchCfg(const char *FileName,
 **         4. New sections are created at the end of the file.
 */
 
-int UpdateCfg(const char *FileName,
+int IniFiler_UpdateCfg(const char *FileName,
               char *SectionName,
               char *VarWanted,
               char *NewData)
